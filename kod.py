@@ -1,5 +1,5 @@
 import math
-
+from collections import deque
 
 """
 План кода
@@ -81,14 +81,39 @@ def brosok(self, manual: bool = False):  # функция осуществлен
                print("Ошибка: вводите только числа!")
    else:  # броски остальных - неизвестны, поэтому оставляем пустыми
        self.hand = []
-"""
 class Perudo: 
 """
 Функции про раунды:
    6. Определение роли игрока в раунде
+
+"""
+   def __init__(self, player_names, username):
+      self.players = deque([Player(name) for name in player_names]) # deque - двусторонняя очередь, короче, улучшенный список как раз для наших целей. Для него я импортировала модуль в начале.
+      self.username = username # username и player_names мы возьмем в конце, в стартовике кода
+      self.roundnumb = 0 # ну и объявляшка номера раунда по порядку, когда игра не запущена - нулевой раунд
+"""
    7. Определение количества активных игроков
+"""
+   def get_active_players(self):
+          # возвращаем список игроков, у которых еще есть кубики
+          return [p for p in self.players if p.dice > 0]
+"""
    8. Установление очередности игроков
+"""
+   def first_player(self, name: str):
+          # устанавливаем первого игрока в раунде
+          while self.players[0].name != name:
+              self.players.rotate(-1)
+"""
    9. Проверка наличия нашего игрока в игровом процессе
+"""
+      def get_user(self):
+       # возвращаем объект нашего игрока
+       for p in self.players:
+           if p.name == self.username:
+               return p
+       return None
+"""
    10. Начало нового раунда (+ мб вывод текущего положения)
    11. Если (9) выполняется, то просит наши кости через (5)
    12. Ввод итогов раунда - победа/проигрыш и обновление статуса через (4) + общего кол-ва кубиков
