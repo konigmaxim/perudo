@@ -148,6 +148,27 @@ def next_round(self): #начинаем раунды
   
 """
    12. Ввод итогов раунда - победа/проигрыш и обновление статуса через (4) + общего кол-ва кубиков
+"""
+def round_end(self):
+       # Обрабатывает конец раунда
+       loh = input("Введите имя проигравшего (или '-' если есть победитель): ")
+       if loh != "-":
+           for p in self.players:
+               if p.name == loh:
+                   p.dice = max(0, p.dice - 1)
+                   p.update_status()
+       else:
+           winner = input("Введите имя победителя: ")
+           for p in self.players:
+               if p.name == winner:
+                   p.dice += 1
+                   p.update_status()
+
+
+   def other_dice(self):
+       # Возвращает общее количество скрытых кубиков (всех кроме нашего игрока)
+       return sum(p.dice for p in self.players if p.name != self.username)
+"""
    13. Проверка на победу во всей игре и возвращение итога, при победе
    14. Общая функция процесса игры, в которую мы кладем все предыдущее
 
