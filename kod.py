@@ -170,6 +170,16 @@ def round_end(self):
        return sum(p.dice for p in self.players if p.name != self.username)
 """
    13. Проверка на победу во всей игре и возвращение итога, при победе
+"""
+def check_winner(self): #проверка на победителя всей игры - если остался только 1 чел с кубиками
+   active_players = self.get_active_players()
+   if len(active_players) == 1: #функция get_active_players у нас создает список, значит мы можем проверить через длину этого списка
+       winner = active_players[0].name #собственно, если длина 1, то этого чела (нулевой и единственный элемент) и берем
+       print("Игра окончена! Победитель: " + winner)
+       return True #если true, то конец игры
+   return False #если false, то начинается следующий ход и по кругу
+"""
+
    14. Общая функция процесса игры, в которую мы кладем все предыдущее
 
 
