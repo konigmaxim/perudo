@@ -1,5 +1,8 @@
 import math
 from collections import deque
+import tkinter as tk  # ткинкеровские библиотеки
+from tkinter import simpledialog, messagebox
+import threading
 
 """
 Формула рассчитывает вероятность утверждений
@@ -48,44 +51,53 @@ class Player:
         if self.dice == 0:  # потом в коде пропишем, что кто с 0,тот ход скипается
             self.status = "на мели, пройдоха"
         elif self.dice == 1 and self.mpt == 0:  # проверка условий подходящих мапуто
-            decision = input(f"Объявляет ли {self.name} статус мапуто: ")
-            if decision.strip().lower() == "да":
+            decision = simpledialog.askstring("Мапуто", f"Объявляет ли {self.name} статус мапуто? (да/нет)")
+            if decision and decision.strip().lower() == "да":  # два. раза, чтобы проверить, что вообще что-то ввели
                 self.status = "мапуто"
+                self.mpt = 1
             else:
                 self.status = "нейтральный"
         else:  # 2+ кубика
             self.status = "нейтральный"
 
-    def dice_cast(self, manual: bool = False):  # функция осуществления бросков
+    def dice_cast(self, manual: bool = False, app=None):  # функция осуществления бросков
         if manual:  # наш вводим вручную
             while True:
-                values = input(
-                    "Дружище, введи значения своих костей (от 1 до 6) через пробел: ").strip().split()  # вводим наши значения через пробел. На всякий случай делаем strip от всего лишнего
+                entry = simpledialog.askstring("Бросок кубиков",
+                                               f"{self.name}, введи значения своих костей (от 1 до 6) через пробел:")
+                if entry is None:
+                    continue
+                values = entry.strip().split()  # вводим наши значения через пробел. На всякий случай делаем strip от всего лишнего
                 try:  # конструкция try-except - чтобы исключить варианты, когда введено что-то не то
                     nums = list(map(int, values))  # закидываем в список
                     if len(nums) != self.dice:  # проверка, чтобы количество введенных нами значений совпадало с текущим колвом кубиков
-                        print(f"Салага, ты ошибся: у тебя должно быть ровно {self.dice} кубиков!")
+                        messagebox.showerror("Ошибка", f"У тебя должно быть ровно {self.dice} костей!")
                         continue
                     if not all(1 <= val <= 6 for val in
                                nums):  # проверка, что все введенные значения в диапазоне 1-6 (кубик-шестигранник)
-                        print("Салага, ты ошибся: кости должны быть числом от 1 до 6!")
+                        messagebox.showerror("Ошибка", "Кости должны быть числом от 1 до 6!")
                         continue
                     self.hand = nums  # закидываем наш проверенный и правильный список в характеристики класса
+                    app.log(f"{self.name}, твой бросок: {" ".join(str(i) for i in self.hand)}")
                     break
                 except ValueError:  # вторая часть конструкции try-except. ValueError - проверка на неподдерживаемые значения
-                    print("Салага, ты ошибся: вводи только целые числа!")
+                    messagebox.showerror("Ошибка", "Дружище, вводи только целые значения!")
         else:  # броски остальных - неизвестны, поэтому оставляем пустыми
             self.hand = []
 
 
 class Perudo:
 
-    def __init__(self, player_names, username):
+    def __init__(self, player_names, username, gui):
         self.players = deque([Player(name) for name in
                               player_names])  # deque - двусторонняя очередь, короче, улучшенный список как раз для наших целей. Для него я импортировала модуль в начале.
         self.username = username  # username и player_names мы возьмем в конце, в стартовике кода
         self.roundnumb = 0  # ну и объявляшка номера раунда по порядку, когда игра не запущена - нулевой раунд
         self.lastofus = 0  # индекс игрока, объявившего "конец" в предыдущем раунде
+        self.gui = gui  # ткинкер
+
+    def log(self, message):  # ткинкер
+        self.gui.log(message)
 
     def get_active_players(self):
         # возвращаем список игроков, у которых еще есть кубики
@@ -110,38 +122,43 @@ class Perudo:
 
     def next_round(self):  # начинаем раунды
         self.roundnumb += 1  # номер раунда увеличивается + выводим красивенько
-        print('--- Раунд ' + str(self.roundnumb) + " ---")
-        print("Текущее состояние игроков:")
+        self.log(f'--- Раунд {self.roundnumb} ---')
+        self.log("Текущее состояние игроков:")
         for p in self.players:  # выводим
-            print(p.name + ' : ' + str(p.dice) + " кубиков (" + p.status + ")")
+            self.log(f"{p.name} : {p.dice} кубиков ({p.status})")
 
         # производим бросок кубиков по вышенаписанной функции
         for p in self.get_active_players():
             if p.name == self.username:
-                p.dice_cast(manual=True)  # если игрок мы, то вводим сами
+                p.dice_cast(manual=True, app=self)  # если игрок мы, то вводим сами
             else:
-                p.dice_cast(manual=False)  # если игрок - не мы, то автоматом (пустые)
+                p.dice_cast(manual=False, app=self)  # если игрок - не мы, то автоматом (пустые)
 
     def statement(self, name: str):  # вводим стейтементы других игроков
-        entry = input('Морской волк, введи утверждение игрока ' + name + '(например: 6 2 [шесть двоек]) или "Конец": ')
+        entry = simpledialog.askstring("Утверждение", f'Введи утверждение игрока {name} (например: 6 2) или "Конец":')
+        if entry is None:
+            return self.statement(name)  # ткинкеровская условность
         if entry.strip().lower() == "конец":
             return "end", None, None  # я пока обозначу то, что возвращается вот так - end и claim (в функции запуска это будут флаги-маркеры), может, потом еще поменяю
         try:  # конструкция try-except, как до этого у нас была в броске
-            k, val = map(int,
-                         entry.strip().split())  # вводим наши 6 2 (шесть двоек), k - количество, val - значение-номинал
+            quant, val = map(int,
+                             entry.strip().split())  # вводим наши 6 2 (шесть двоек), k - количество, val - значение-номинал
             if val < 1 or val > 6:
-                print("Салага, ты ошибся. Номинал должен быть от 1 до 6.")
+                messagebox.showerror("Ошибка", "Салага, ты ошибся. Номинал должен быть от 1 до 6.")
                 return self.statement(name)
-            return "claim", k, val
+            return "claim", quant, val
         except:
-            print("Салага, ты ошибся. Введи нормально.")  # если вводят что-то левое
+            messagebox.showerror("Ошибка", "Введи два числа через пробел или 'Конец'!")  # если вводят что-то левое
             return self.statement(
                 name)  # рекурсируем, т.е. возвращаем в начало и просим все ввести заново, если ввели что-то левое до этого
 
     def round_end(self):
         # Обрабатывает конец раунда
         while True:  # такая же ситуация с вводом первого по очередности игрока
-            loser = input("Введи имя проигравшего неудачника (или '-' если есть победивший везунчик): ")
+            loser = simpledialog.askstring("Конец раунда",
+                                           "Введи имя проигравшего неудачника (или '-' если есть победивший):")
+            if loser is None:  # ткинкерская условность
+                continue
             if loser in [p.name for p in self.players]:
                 for p in self.players:
                     if p.name == loser:
@@ -152,7 +169,7 @@ class Perudo:
                 break
             elif loser == "-":
                 while True:
-                    winner = input("Введите имя победившего везунчика: ")
+                    winner = simpledialog.askstring("А кто победил?", "Введи имя победившего везунчика:")
                     if winner in [p.name for p in self.players]:
                         for p in self.players:
                             if p.name == winner:
@@ -162,10 +179,10 @@ class Perudo:
                                 p.update_status()
                         break
                     else:
-                        print("Салага, ты ввел что-то не то. Попробуй еще раз.")
+                        messagebox.showerror("Ошибка", "Дружище, такого имени нет среди игроков.")
                 break
             else:
-                print("Салага, ты ввел что-то не то. Попробуй еще рвз.")
+                messagebox.showerror("Ошибка", "Дружище, такого имени нет среди игроков.")
 
     def other_dice(self):
         # Возвращает общее количество скрытых кубиков (всех кроме нашего игрока)
@@ -176,27 +193,27 @@ class Perudo:
         if len(active_players) == 1:  # функция get_active_players у нас создает список, значит мы можем проверить через длину этого списка
             winner = active_players[
                 0].name  # собственно, если длина 1, то этого чела (нулевой и единственный элемент) и берем
-            print("Йо-хо-хо, игра окончена! Победитель: " + winner)
+            self.log("Йо-хо-хо, игра окончена! Победитель: " + winner)
             return True  # если true, то конец игры
         return False  # если false, то начинается следующий ход и по кругу
 
-               def play(self):  # функция-основной цикл игры
-        print("Рад видеть ваши рожи! Полных парусов и сухого пороха!")  # устанавливаем первого игрока
+    def play(self):  # функция-основной цикл игры
+        self.log("Рад видеть ваши рожи! Полных парусов и сухого пороха!")  # устанавливаем первого игрока
         while True:
-            self.username = input("Приятель, введи свое имя: ").strip()
+            self.username = simpledialog.askstring("А как тебя зовут?", "Приятель, введи свое имя:")
             if self.username in [p.name for p in
                                  self.players]:  # проверка на то, что наше имя есть среди всех игроков, введенных ранее
                 break  # если все норм, то скип
             else:
-                print(
-                    "Салага, ты ввел что-то не то. Этого имени нет среди игроков")  # если не норм, то заново запускается while. И так по бесконечности, пока не будет break (правильный ввод)
+                messagebox.showerror("Ошибка",
+                                     "Дружище, этого имени нет среди игроков.")  # если не норм, то заново запускается while. И так по бесконечности, пока не будет break (правильный ввод)
         while True:  # такая же ситуация с вводом первого по очередности игрока
-            first = input("А кто начнет нашу битву? Введи имя: ").strip()
+            first = simpledialog.askstring("Первый игрок", "А кто начнет нашу битву? Введи имя:")
             if first in [p.name for p in self.players]:
                 self.first_player(first)
                 break
             else:
-                print("Салага, ты ввел что-то не то. Этого имени нет среди игроков")
+                messagebox.showerror("Ошибка", "Дружище, такого имени нет среди игроков.")
 
         # наш главный игровой цикл
         while len(self.get_active_players()) > 1:  # пока у нас больше чем 1 активный игрок
@@ -215,7 +232,7 @@ class Perudo:
                     continue
 
                 # получаем утверждение игрока (если его не скипнули)
-                flag, k, val = self.statement(real.name)
+                flag, quant, val = self.statement(real.name)
                 if flag == "end":
                     self.lastofus = self.players.index(real)  # перезаписываем индекс (остаток) закончившего игрока
                     self.round_end()  # если игрок сделал утверждение "конец", заканчиваем текущий раунд и начинаем с начала цикла
@@ -225,19 +242,47 @@ class Perudo:
                 # проверяем статус мапуто и считаем вероятность
                 maputo_active = any(
                     p.status == "мапуто" for p in self.get_active_players())  # статусы из функции про статусы))
-                prob = formula(k, val, user.hand, self.other_dice(),
+                prob = formula(quant, val, user.hand, self.other_dice(),
                                maputo=maputo_active)  # посчитанная через функцию формулы вероятность
-                print(
-                    f"Пират {real.name} прав(-а) с вероятностью: {round(prob * 100, 2)}%")  # выводим переведенную в проценты (с округлением)
+                self.log(
+                    f"Пират {real.name} прав с вероятностью: {round(prob * 100, 2)}% ({quant} {val})")  # выводим переведенную в проценты (с округлением)
                 idx += 1  # продолжаем крутить игроков по кругу
 
             if self.check_winner():  # если образовался победитель
                 break  # заканчиваем игру
-        print("Что ж, игра завершена. Славно намутили шторм в трюме, заглядывай еще.")
+        self.log("Что ж, похоже, мы закончили. Славно намутили шторм в трюме, заглядывай еще.")
 
 
-print("Добро пожаловать в игру Перудо, пираты!")
-names = input(
-    "Ну что, сыграем? Введи имена игроков через пробел: ").split()  # самые-самые первые строки, которые выводит код
-game = Perudo(names, "")  # инициирование игры (в class Perudo - names это player_names, “” - это username
-game.play()
+class GameGUI:  # интерфейс ткинкером
+
+    def __init__(self):
+        self.root = tk.Tk()  # главное окно
+        self.root.title("Игра перудо")  # название
+        self.root.geometry("1250x800")  # размер
+        self.bg_image = tk.PhotoImage(file="background_1.gif")  # изображение фона (загружаем)
+        self.background_label = tk.Label(self.root, image=self.bg_image)  # настраиваем фон через label
+        self.background_label.place(x=0, y=0, relwidth=1, relheight=1)  # и его координаты
+        self.frame = tk.Frame(self.root, bg='#fdf6e3')  # штука с текстом поверх фона
+        self.frame.place(x=20, y=20, width=800, height=700)  # координаты ее
+        self.text = tk.Text(self.frame, wrap=tk.WORD, font=("Helvetica", 20), bg="#fdf6e3",
+                            relief=tk.FLAT)  # настройки текста
+        self.text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        self.root.after(100, self.run_game)
+        self.root.mainloop()
+
+    def log(self, message):  # вывод сообщений в мини-окошки
+        self.text.insert(tk.END, message + "\n")
+        self.text.see(tk.END)
+
+    def run_game(self):
+        self.log("Ну что, тряхнем костями? Давай начинать игру.")
+        names_str = simpledialog.askstring("Игроки", "Введи имена игроков через пробел:")
+        if names_str:
+            names = names_str.strip().split()
+            game = Perudo(names, "", self)
+            game.play()
+
+
+if __name__ == "__main__":  # запуск
+    GameGUI()
