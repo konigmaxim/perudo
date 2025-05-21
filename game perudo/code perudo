@@ -260,7 +260,7 @@ class GameGUI:
        self.root = tk.Tk()
        self.root.title("Игра перудо")
        self.root.geometry("1250x800")
-       self.bg_image = tk.PhotoImage(file="background_1.gif")
+       self.bg_image = tk.PhotoImage(file="background.gif")
        self.background_label = tk.Label(self.root, image=self.bg_image)
        self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
        self.frame = tk.Frame(self.root, bg='#fdf6e3')
