@@ -2,8 +2,11 @@
 ### 🍻Список участников 
 
 Абдулина Алена Алексеевна, БФиКЛ243, [https://github.com/Alena-Ab](https://github.com/Alena-Ab)
+
 Быстрова Алина Максимовна, БФиКЛ243, [https://github.com/alinnick](https://github.com/alinnick)
+
 Долнаков Максим Валерьевич, БФиКЛ243, [https://github.com/konigmaxim](https://github.com/konigmaxim)
+
 Зверева Дарья Александровна, БФиКЛ242, [https://github.com/dariazvereva10](https://github.com/dariazvereva10)
 
 ### ☠️Описание проекта
@@ -64,16 +67,31 @@ requirements.txt - список всех модулей, необходимых 
 ### 🐚Ссылки на ресурсы:
 
 **try - except:**
+
 [https://pythonworld.ru/tipy-dannyx-v-python/isklyucheniya-v-python-konstrukciya-try-except-dlya-obrabotki-isklyuchenij.html](https://pythonworld.ru/tipy-dannyx-v-python/isklyucheniya-v-python-konstrukciya-try-except-dlya-obrabotki-isklyuchenij.html)
+
 [https://education.yandex.ru/handbook/python/article/model-isklyuchenij-python-try-except-else-finally-moduli](https://education.yandex.ru/handbook/python/article/model-isklyuchenij-python-try-except-else-finally-moduli)
+
 **math:**
+
 [https://education.yandex.ru/handbook/python/article/moduli-math-i-numpy](https://education.yandex.ru/handbook/python/article/moduli-math-i-numpy)
+
 **deque:**
+
 [https://docs-python.ru/standart-library/modul-collections-python/klass-deque-modulja-collections/](https://docs-python.ru/standart-library/modul-collections-python/klass-deque-modulja-collections/)
+
 [https://sky.pro/media/kak-rabotat-s-modulem-collections-v-python-2/](https://sky.pro/media/kak-rabotat-s-modulem-collections-v-python-2/)
-**tkinter**: [https://docs.python.org/3/library/tkinter.html](https://docs.python.org/3/library/tkinter.html)
+
+**tkinter**: 
+
+[https://docs.python.org/3/library/tkinter.html](https://docs.python.org/3/library/tkinter.html)
+
 **Классы**:
+
 [https://metanit.com/python/tutorial/7.1.php](https://metanit.com/python/tutorial/7.1.php)
+
 [https://education.yandex.ru/handbook/python/article/obuektnaya-model-python-klassy-polya-i-metody](https://education.yandex.ru/handbook/python/article/obuektnaya-model-python-klassy-polya-i-metody)
+
 **Оф. сайт Python:** [https://www.python.org/doc/](https://www.python.org/doc/)
+
 **вывод формулы мат. ожидания для игры перудо**: [https://habr.com/ru/articles/850016/](https://habr.com/ru/articles/850016/) 
