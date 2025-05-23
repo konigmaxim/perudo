@@ -2,7 +2,6 @@ import math
 from collections import deque
 import tkinter as tk
 from tkinter import simpledialog, messagebox
-import threading
 
 
 """
