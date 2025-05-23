@@ -95,3 +95,5 @@ requirements.txt - список всех модулей, необходимых 
 **Оф. сайт Python:** [https://www.python.org/doc/](https://www.python.org/doc/)
 
 **вывод формулы мат. ожидания для игры перудо**: [https://habr.com/ru/articles/850016/](https://habr.com/ru/articles/850016/) 
+
+*Запустить код можно на любой версии Python, начиная с 3.8*
